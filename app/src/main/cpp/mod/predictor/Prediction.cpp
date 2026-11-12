@@ -80,6 +80,62 @@ void Prediction::calculateShotResultSize() {
     }
 }
 
+float *Prediction::predictFromVision(const float *ballData, int dataSize,
+                                      double shotAngle, double shotPower,
+                                      const Point2D &shotSpin) {
+    if (ballData == nullptr || dataSize < 3 || !std::isfinite(shotAngle) ||
+        !std::isfinite(shotPower) || shotPower <= 0.0) {
+        guiData.ballsCount = 0;
+        shotResultSize = 2;
+        shotResult[0] = 0.0f;
+        shotResult[1] = 0.0f;
+        return shotResult;
+    }
+
+    int count = static_cast<int>(ballData[0]);
+    if (count < 1 || count > MAX_BALLS_COUNT || dataSize < 1 + count * 2) {
+        shotResultSize = 2;
+        shotResult[0] = 0.0f;
+        shotResult[1] = 0.0f;
+        return shotResult;
+    }
+
+    guiData.ballsCount = count;
+    for (int i = 0; i < count; ++i) {
+        const double nx = std::max(0.0, std::min(1.0, static_cast<double>(ballData[1 + i * 2])));
+        const double ny = std::max(0.0, std::min(1.0, static_cast<double>(ballData[2 + i * 2])));
+        Ball &ball = guiData.balls[i];
+        ball.index = i;
+        ball.state = BallState::DEFAULT;
+        ball.originalOnTable = true;
+        ball.onTable = true;
+        ball.classification = (i == 0) ? BallClassification::CUE_BALL : BallClassification::SOLID;
+        ball.initialPosition = Point2D(nx * TABLE_WIDTH - TABLE_HALF_WIDTH,
+                                       TABLE_HALF_HEIGHT - ny * TABLE_HEIGHT);
+        ball.predictedPosition = ball.initialPosition;
+        ball.velocity.nullify();
+        ball.spin.nullify();
+        ball.positions.clear();
+        ball.positions.reserve(64);
+        ball.positions.push_back(ball.initialPosition);
+    }
+
+    GlobalSettings::isDrawLinesEnabled = true;
+    GlobalSettings::isDrawShotStateEnabled = false;
+    guiData.collision.firstHitBall = nullptr;
+    for (bool &status : pocketStatus) status = false;
+    initCueBall(shotAngle, shotPower, shotSpin);
+    determineBallsPositions();
+    for (int i = 0; i < guiData.ballsCount; ++i) {
+        Ball &ball = guiData.balls[i];
+        if (!ball.positions.empty() && ball.positions.back() != ball.predictedPosition) {
+            ball.positions.push_back(ball.predictedPosition);
+        }
+    }
+    calculateShotResultSize();
+    return getShotResult();
+}
+
 bool Prediction::determineShotResult() {
     if (!MemoryManager::MenuManager::isInGame() ||
         !MemoryManager::GameManager::isValidGameState()) {
