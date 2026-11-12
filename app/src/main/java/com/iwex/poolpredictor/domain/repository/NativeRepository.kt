@@ -12,6 +12,15 @@ interface NativeRepository {
 
     fun setTablePosition(tablePosition: TablePosition)
 
+    /** Submit detected ball centers and cue direction to the native physics engine. */
+    fun predictFromVision(
+        ballData: FloatArray,
+        shotAngle: Float,
+        shotPower: Float,
+        spinX: Float = 0f,
+        spinY: Float = 0f
+    )
+
     fun updateShotResult(shotResultArray: FloatArray)
 
     fun exit()
