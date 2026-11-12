@@ -32,6 +32,18 @@ class NativeRepositoryImpl : NativeRepository {
         }
     }
 
+    override fun predictFromVision(
+        ballData: FloatArray,
+        shotAngle: Float,
+        shotPower: Float,
+        spinX: Float,
+        spinY: Float
+    ) {
+        if (ballData.size < 3) return
+        val result = NativeBridge.predictFromVision(ballData, shotAngle, shotPower, spinX, spinY)
+        if (result.isNotEmpty()) _shotResult.postValue(ShotResult(result))
+    }
+
     override fun updateShotResult(shotResultArray: FloatArray) {
         _shotResult.postValue(ShotResult(shotResultArray))
     }
