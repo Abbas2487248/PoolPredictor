@@ -14,6 +14,8 @@
 
 #define METHOD_UPDATE_AIM_SETTINGS "updateAimSettings"
 
+#define METHOD_PREDICT_FROM_VISION "predictFromVision"
+
 #define METHOD_EXIT_THREAD "exitThread"
 
 #define METHOD_SET_NATIVE_REPOSITORY "setNativeRepository"
@@ -29,6 +31,8 @@
 /* METHOD SIGNATURES =============================================================================*/
 
 #define SIG_UPDATE_AIM_SETTINGS "(ZZZZII)V"
+
+#define SIG_PREDICT_FROM_VISION "([FFFF)[F"
 
 #define SIG_EXIT_THREAD "()V"
 
