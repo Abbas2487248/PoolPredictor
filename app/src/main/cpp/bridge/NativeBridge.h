@@ -23,6 +23,10 @@ private:
 
     static void initEmptyShotResult();
 
+    static jfloatArray predictFromVision(JNIEnv *env, jclass, jfloatArray ballData,
+                                        jfloat shotAngle, jfloat shotPower,
+                                        jfloat spinX, jfloat spinY);
+
     static void updateAimSettings(
             JNIEnv *,
             jclass,
