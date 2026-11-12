@@ -21,6 +21,10 @@ public:
 
     bool determineShotResult();
 
+    // Screenshot-driven entry point. Input positions are normalized to the table rectangle [0..1].
+    float *predictFromVision(const float *ballData, int dataSize, double shotAngle,
+                             double shotPower, const Point2D &shotSpin);
+
     bool mockPredictShotResult();
 
     class Ball {
