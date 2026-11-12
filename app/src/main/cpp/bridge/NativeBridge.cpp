@@ -84,6 +84,27 @@ void NativeBridge::initEmptyShotResult() {
     mEmptyShotResult = (jfloatArray) mEnv->NewGlobalRef(mEmptyShotResult);
 }
 
+jfloatArray NativeBridge::predictFromVision(JNIEnv *env, jclass, jfloatArray ballData,
+                                                   jfloat shotAngle, jfloat shotPower,
+                                                   jfloat spinX, jfloat spinY) {
+    if (ballData == nullptr) return nullptr;
+    const jsize length = env->GetArrayLength(ballData);
+    if (length < 3 || length > 1 + MAX_BALLS_COUNT * 2) return nullptr;
+    std::vector<float> input(static_cast<size_t>(length));
+    env->GetFloatArrayRegion(ballData, 0, length, input.data());
+    if (env->ExceptionCheck()) return nullptr;
+
+    GlobalSettings::isDrawLinesEnabled = true;
+    GlobalSettings::isDrawShotStateEnabled = false;
+    float *result = gPrediction->predictFromVision(input.data(), length, shotAngle,
+                                                   shotPower, Point2D(spinX, spinY));
+    const int resultSize = gPrediction->getShotResultSize();
+    if (resultSize <= 0 || resultSize > MAX_SHOT_RESULT_SIZE) return nullptr;
+    jfloatArray output = env->NewFloatArray(resultSize);
+    if (output != nullptr) env->SetFloatArrayRegion(output, 0, resultSize, result);
+    return output;
+}
+
 void NativeBridge::updateAimSettings(
         JNIEnv *,
         jclass,
@@ -174,6 +195,7 @@ int NativeBridge::registerNativeMethods(JNIEnv *env) {
     }
     JNINativeMethod methods[] = {
             {METHOD_UPDATE_AIM_SETTINGS,   SIG_UPDATE_AIM_SETTINGS,   reinterpret_cast<void *>(NativeBridge::updateAimSettings)},
+            {METHOD_PREDICT_FROM_VISION, SIG_PREDICT_FROM_VISION, reinterpret_cast<void *>(NativeBridge::predictFromVision)},
             {METHOD_EXIT_THREAD,           SIG_EXIT_THREAD,           reinterpret_cast<void *>(NativeBridge::exitThread)},
             {METHOD_SET_NATIVE_REPOSITORY, SIG_SET_NATIVE_REPOSITORY, reinterpret_cast<void *>(NativeBridge::setNativeRepository)},
             {METHOD_SET_TABLE_POSITION,    SIG_SET_TABLE_POSITION,    reinterpret_cast<void *>(NativeBridge::setTablePosition)},
