@@ -5,6 +5,8 @@
 #include "../data/table/TableProperties.h"
 #include "../../utils/NumberUtils.h"
 #include <array>
+#include <algorithm>
+#include <cmath>
 
 static Prediction prediction;
 Prediction *gPrediction = &prediction;
