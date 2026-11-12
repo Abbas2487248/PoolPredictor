@@ -12,10 +12,6 @@ class NativeRepositoryImpl : NativeRepository {
     private val _shotResult = MutableLiveData<ShotResult>()
     override val shotResult: LiveData<ShotResult> get() = _shotResult
 
-    init {
-        NativeBridge.setNativeRepository(this)
-    }
-
     override fun updateAimSettings(aimSettings: AimSettings) {
         with(aimSettings) {
             NativeBridge.updateAimSettings(
