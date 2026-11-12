@@ -17,10 +17,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-      - name: Install NDK
-        run: sdkmanager "ndk;22.1.7171670" "cmake;3.22.1"
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;22.1.7171670" "cmake;3.22.1"
       - name: Build debug APK
         run: |
           chmod +x ./gradlew
